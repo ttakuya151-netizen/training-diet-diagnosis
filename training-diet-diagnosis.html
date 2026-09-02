@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>筋トレ×食事タイプ診断</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@500;700;900&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #14171F;
+    --ink-soft: #9AA0AE;
+    --paper: #F6F3EC;
+    --paper-dim: #E7E2D6;
+    --power: #FF5A36;
+    --mint: #2FBF9F;
+    --line: rgba(246, 243, 236, 0.16);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'Noto Sans JP', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 16px;
+  }
+
+  .app {
+    width: 100%;
+    max-width: 560px;
+  }
+
+  h1, h2, h3, .display {
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-weight: 900;
+    letter-spacing: 0.01em;
+  }
+
+  /* ---------- START SCREEN ---------- */
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  .kicker {
+    font-size: 14px;
+    color: var(--power);
+    font-weight: 700;
+    margin-bottom: 14px;
+  }
+
+  .hero-title {
+    font-size: 40px;
+    line-height: 1.25;
+    margin-bottom: 20px;
+  }
+
+  .hero-title .accent { color: var(--power); }
+
+  .hero-desc {
+    font-size: 15px;
+    line-height: 1.9;
+    color: var(--ink-soft);
+    margin-bottom: 32px;
+  }
+
+  .meta-row {
+    display: flex;
+    gap: 24px;
+    padding: 18px 0;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 32px;
+  }
+
+  .meta-item .num {
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-weight: 900;
+    font-size: 26px;
+    display: block;
+  }
+
+  .meta-item .label {
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin-top: 2px;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 18px 24px;
+    background: var(--power);
+    color: var(--ink);
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-weight: 900;
+    font-size: 17px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: transform 0.15s ease, background 0.15s ease;
+  }
+
+  .btn:hover { background: #ff6f4f; transform: translateY(-1px); }
+  .btn:active { transform: translateY(0); }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--paper);
+    border: 1.5px solid var(--line);
+  }
+  .btn-outline:hover { background: rgba(246,243,236,0.06); }
+
+  /* ---------- QUIZ SCREEN ---------- */
+  .progress-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  .progress-count {
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-weight: 900;
+    font-size: 22px;
+  }
+  .progress-count span { color: var(--ink-soft); font-size: 15px; }
+
+  .progress-track {
+    height: 4px;
+    background: var(--line);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 36px;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--power);
+    width: 0%;
+    transition: width 0.35s ease;
+  }
+
+  .question-text {
+    font-size: 24px;
+    line-height: 1.5;
+    margin-bottom: 28px;
+  }
+
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .option {
+    text-align: left;
+    padding: 18px 20px;
+    background: transparent;
+    border: 1.5px solid var(--line);
+    border-radius: 4px;
+    color: var(--paper);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+
+  .option:hover {
+    border-color: var(--power);
+    background: rgba(255, 90, 54, 0.08);
+  }
+
+  .quiz-nav {
+    margin-top: 28px;
+  }
+
+  /* ---------- RESULT SCREEN ---------- */
+  .result-card {
+    background: var(--paper);
+    color: var(--ink);
+    border-radius: 4px;
+    padding: 36px 28px;
+    margin-bottom: 24px;
+  }
+
+  .result-kicker {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--power);
+    margin-bottom: 10px;
+  }
+
+  .result-type {
+    font-size: 34px;
+    line-height: 1.3;
+    margin-bottom: 8px;
+  }
+
+  .result-tagline {
+    font-size: 15px;
+    color: #5b5f6b;
+    margin-bottom: 24px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--paper-dim);
+  }
+
+  .stat-block {
+    margin-bottom: 22px;
+  }
+
+  .stat-label {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 3px;
+    margin-bottom: 10px;
+  }
+
+  .stat-label.training { background: var(--power); color: var(--ink); }
+  .stat-label.diet { background: var(--mint); color: var(--ink); }
+
+  .stat-body {
+    font-size: 14.5px;
+    line-height: 1.85;
+    color: #2a2d35;
+  }
+
+  .sample-day {
+    background: var(--paper-dim);
+    border-radius: 4px;
+    padding: 16px 18px;
+    margin-bottom: 22px;
+  }
+
+  .sample-day .stat-body { font-size: 13.5px; }
+
+  .caution {
+    font-size: 13px;
+    line-height: 1.8;
+    color: #5b5f6b;
+    padding-top: 18px;
+    border-top: 1px solid var(--paper-dim);
+  }
+
+  .caution b { color: var(--ink); }
+
+  .result-actions {
+    display: flex;
+    gap: 10px;
+  }
+
+  .type-breakdown {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+  }
+
+  .type-bar {
+    flex: 1;
+    text-align: center;
+  }
+
+  .type-bar-track {
+    height: 60px;
+    width: 100%;
+    background: var(--line);
+    border-radius: 3px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: flex-end;
+  }
+
+  .type-bar-fill {
+    width: 100%;
+    background: var(--ink-soft);
+    transition: height 0.5s ease;
+  }
+
+  .type-bar-fill.leading { background: var(--power); }
+
+  .type-bar-name {
+    font-size: 11px;
+    color: var(--ink-soft);
+    margin-top: 8px;
+  }
+
+  @media (max-width: 420px) {
+    .hero-title { font-size: 32px; }
+    .result-type { font-size: 28px; }
+    .question-text { font-size: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- START -->
+  <div class="screen active" id="screen-start">
+    <div class="kicker">TRAINING × DIET DIAGNOSIS</div>
+    <h1 class="hero-title">あなたの<span class="accent">続けやすい</span><br>トレーニング×食事タイプは?</h1>
+    <p class="hero-desc">
+      トレーニングの頻度から食事の選び方まで、8つの質問から「無理なく続けられるスタイル」を診断します。正解はひとつではなく、自分の生活リズムに合った形を見つけるための診断です。
+    </p>
+    <div class="meta-row">
+      <div class="meta-item">
+        <span class="num">8問</span>
+        <span class="label">質問数</span>
+      </div>
+      <div class="meta-item">
+        <span class="num">2分</span>
+        <span class="label">所要時間</span>
+      </div>
+      <div class="meta-item">
+        <span class="num">4種</span>
+        <span class="label">診断タイプ</span>
+      </div>
+    </div>
+    <button class="btn" onclick="startQuiz()">診断をはじめる</button>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="screen" id="screen-quiz">
+    <div class="progress-row">
+      <div class="progress-count"><span id="q-current">1</span> <span>/ 8</span></div>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+    <div class="question-text" id="question-text"></div>
+    <div class="options" id="options-container"></div>
+  </div>
+
+  <!-- RESULT -->
+  <div class="screen" id="screen-result">
+    <div class="result-card">
+      <div class="result-kicker" id="result-kicker">DIAGNOSIS RESULT</div>
+      <h2 class="result-type" id="result-type"></h2>
+      <p class="result-tagline" id="result-tagline"></p>
+
+      <div class="type-breakdown" id="type-breakdown"></div>
+
+      <div class="stat-block">
+        <span class="stat-label training">トレーニング</span>
+        <p class="stat-body" id="result-training"></p>
+      </div>
+
+      <div class="stat-block">
+        <span class="stat-label diet">食事</span>
+        <p class="stat-body" id="result-diet"></p>
+      </div>
+
+      <div class="sample-day">
+        <p class="stat-body" id="result-sample"></p>
+      </div>
+
+      <p class="caution" id="result-caution"></p>
+    </div>
+
+    <div class="result-actions">
+      <button class="btn btn-outline" onclick="restartQuiz()">もう一度診断する</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const questions = [
+    {
+      text: "運動の目的にいちばん近いのは?",
+      options: [
+        { label: "とにかく強く、大きくなりたい", type: "P" },
+        { label: "長く動ける体力・持久力がほしい", type: "E" },
+        { label: "忙しい中でも効率よく結果を出したい", type: "K" },
+        { label: "気分よく体を動かせればそれでいい", type: "F" },
+      ]
+    },
+    {
+      text: "トレーニングできる頻度は?",
+      options: [
+        { label: "週4〜5回、しっかり時間をかけたい", type: "P" },
+        { label: "週3〜4回、コンスタントに続けたい", type: "E" },
+        { label: "週2〜3回、短時間で集中したい", type: "K" },
+        { label: "決めていない、気が向いたときに", type: "F" },
+      ]
+    },
+    {
+      text: "1回のトレーニング時間は?",
+      options: [
+        { label: "60分以上、じっくりやりたい", type: "P" },
+        { label: "45〜60分くらい", type: "E" },
+        { label: "20〜30分あれば十分", type: "K" },
+        { label: "その日の気分と時間次第", type: "F" },
+      ]
+    },
+    {
+      text: "食事について、いちばん当てはまるのは?",
+      options: [
+        { label: "たんぱく質量をきっちり計算している", type: "P" },
+        { label: "炭水化物とのバランスを意識している", type: "E" },
+        { label: "コンビニや宅配でも栄養を最適化したい", type: "K" },
+        { label: "食べたいものを、食べたいときに食べたい", type: "F" },
+      ]
+    },
+    {
+      text: "モチベーションが上がるのはどんなとき?",
+      options: [
+        { label: "重量や記録の数値が更新されたとき", type: "P" },
+        { label: "継続日数や距離が伸びているとき", type: "E" },
+        { label: "少ない時間で結果が出た実感があるとき", type: "K" },
+        { label: "その日楽しく体を動かせたとき", type: "F" },
+      ]
+    },
+    {
+      text: "ストレスがたまったときの過ごし方は?",
+      options: [
+        { label: "とことん追い込んで発散する", type: "P" },
+        { label: "軽く汗を流してリセットする", type: "E" },
+        { label: "さっさと終わらせて他のことに時間を使う", type: "K" },
+        { label: "無理せず休む", type: "F" },
+      ]
+    },
+    {
+      text: "外食や飲み会の頻度は?",
+      options: [
+        { label: "少なめにして、しっかりコントロールしたい", type: "P" },
+        { label: "週1〜2回、楽しみつつ他で調整する", type: "E" },
+        { label: "多いが、選び方で上手く調整する", type: "K" },
+        { label: "特に気にせず楽しむ", type: "F" },
+      ]
+    },
+    {
+      text: "睡眠時間は普段どれくらい?",
+      options: [
+        { label: "7時間以上、しっかり確保している", type: "P" },
+        { label: "6〜7時間、まずまず", type: "E" },
+        { label: "6時間前後、効率重視", type: "K" },
+        { label: "日によってバラバラ", type: "F" },
+      ]
+    },
+  ];
+
+  const results = {
+    P: {
+      kicker: "TYPE: POWER",
+      type: "パワー型",
+      tagline: "重さと正面から向き合う、積み上げ型。",
+      training: "高強度・低〜中回数のウェイトトレーニングが軸。週4〜5回、スクワット・デッドリフト・ベンチプレスなどのコンパウンド種目で漸進的に負荷を上げていくスタイルが合っています。",
+      diet: "高たんぱく・計画的な食事管理と相性がよいタイプ。体重1kgあたり1.6〜2.2gのたんぱく質を目安に、オーバーカロリー気味に組み立てると力が出やすくなります。",
+      sample: "例:朝はオートミールとゆで卵、昼は鶏胸肉と玄米、間食にプロテインとバナナ、夜は赤身肉と野菜。",
+      caution: "<b>注意点:</b> 追い込みすぎによるオーバートレーニングと関節への負担に注意。週1回は必ず回復日を確保しましょう。",
+    },
+    E: {
+      kicker: "TYPE: ENDURANCE",
+      type: "持久型",
+      tagline: "積み重ねた時間が、そのまま力になる。",
+      training: "有酸素運動と軽めの筋トレを組み合わせたバランス型。週3〜4回、45〜60分の中強度トレーニングが向いています。ランニングやサイクリング、サーキットトレーニングとの相性も良好です。",
+      diet: "炭水化物をエネルギー源としてしっかり確保しつつ、たんぱく質・脂質もバランスよく。極端な糖質制限より、継続できる食事配分が合っています。",
+      sample: "例:朝は全粒粉トーストとバナナ、昼はそばと鶏ささみ、間食にナッツ、夜は魚と根菜の煮物と玄米。",
+      caution: "<b>注意点:</b> 「頑張りすぎ」で疲労が抜けないまま続けがち。週1回は完全休養日をつくりましょう。",
+    },
+    K: {
+      kicker: "TYPE: EFFICIENCY",
+      type: "効率型",
+      tagline: "最小の時間で、最大の結果を。",
+      training: "HIITや自重トレーニングなど、時短で密度の高いメニューが向いています。週2〜3回、20〜30分で全身を刺激するスタイルが継続しやすいでしょう。",
+      diet: "コンビニ・宅配・作り置きを駆使して、準備の手間を減らしつつ栄養は最適化するスタイル。サラダチキンやプロテインバーが心強い味方になります。",
+      sample: "例:朝はプロテインシェイク、昼はサラダチキンとコンビニサラダ、間食にプロテインバー、夜は作り置きの高たんぱくおかずと冷凍野菜。",
+      caution: "<b>注意点:</b> 時短を優先しすぎて栄養の質が落ちがち。週1回は自炊でしっかりした食事をとる日をつくりましょう。",
+    },
+    F: {
+      kicker: "TYPE: INTUITIVE",
+      type: "感覚型",
+      tagline: "体の声を聞きながら、無理なく続ける。",
+      training: "決まったルーティンより、その日の気分や体調に合わせて種目・強度を選ぶ柔軟なスタイルが向いています。ヨガや散歩、気の向いたときの筋トレなど、選択肢を複数持っておくと続けやすくなります。",
+      diet: "厳密なPFC管理より、「食べたいものを適量」で満足できる直感的な食事スタイルが合っています。1食に1品はたんぱく源を入れることだけ意識すると崩れにくくなります。",
+      sample: "その日の気分次第でOK。意識したいのは、1食に1品たんぱく質を入れることと、野菜を彩りよくとること。",
+      caution: "<b>注意点:</b> 自由度が高い分、記録がないと変化に気づきにくい傾向が。月1回だけ、体の写真や感覚をメモして振り返ってみましょう。",
+    },
+  };
+
+  const typeOrder = ["P", "E", "K", "F"];
+  const typeNames = { P: "パワー", E: "持久", K: "効率", F: "感覚" };
+
+  let currentQuestion = 0;
+  let scores = { P: 0, E: 0, K: 0, F: 0 };
+
+  function startQuiz() {
+    currentQuestion = 0;
+    scores = { P: 0, E: 0, K: 0, F: 0 };
+    showScreen('screen-quiz');
+    renderQuestion();
+  }
+
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  function renderQuestion() {
+    const q = questions[currentQuestion];
+    document.getElementById('q-current').textContent = currentQuestion + 1;
+    document.getElementById('progress-fill').style.width = ((currentQuestion) / questions.length * 100) + '%';
+    document.getElementById('question-text').textContent = q.text;
+
+    const container = document.getElementById('options-container');
+    container.innerHTML = '';
+    q.options.forEach(opt => {
+      const btn = document.createElement('button');
+      btn.className = 'option';
+      btn.textContent = opt.label;
+      btn.onclick = () => selectOption(opt.type);
+      container.appendChild(btn);
+    });
+  }
+
+  function selectOption(type) {
+    scores[type]++;
+    currentQuestion++;
+    if (currentQuestion < questions.length) {
+      renderQuestion();
+    } else {
+      document.getElementById('progress-fill').style.width = '100%';
+      showResult();
+    }
+  }
+
+  function showResult() {
+    let winner = 'P';
+    typeOrder.forEach(t => {
+      if (scores[t] > scores[winner]) winner = t;
+    });
+
+    const r = results[winner];
+    document.getElementById('result-kicker').textContent = r.kicker;
+    document.getElementById('result-type').textContent = r.type;
+    document.getElementById('result-tagline').textContent = r.tagline;
+    document.getElementById('result-training').textContent = r.training;
+    document.getElementById('result-diet').textContent = r.diet;
+    document.getElementById('result-sample').textContent = r.sample;
+    document.getElementById('result-caution').innerHTML = r.caution;
+
+    const maxScore = Math.max(...Object.values(scores), 1);
+    const breakdown = document.getElementById('type-breakdown');
+    breakdown.innerHTML = '';
+    typeOrder.forEach(t => {
+      const wrap = document.createElement('div');
+      wrap.className = 'type-bar';
+      const track = document.createElement('div');
+      track.className = 'type-bar-track';
+      const fill = document.createElement('div');
+      fill.className = 'type-bar-fill' + (t === winner ? ' leading' : '');
+      fill.style.height = (scores[t] / questions.length * 100) + '%';
+      track.appendChild(fill);
+      const name = document.createElement('div');
+      name.className = 'type-bar-name';
+      name.textContent = typeNames[t] + ' ' + scores[t];
+      wrap.appendChild(track);
+      wrap.appendChild(name);
+      breakdown.appendChild(wrap);
+    });
+
+    showScreen('screen-result');
+  }
+
+  function restartQuiz() {
+    startQuiz();
+  }
+</script>
+
+</body>
+</html>
