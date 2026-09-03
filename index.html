@@ -3,7 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>筋トレ×食事タイプ診断</title>
+<title>筋トレ×食事タイプ診断 | あなたに合う続け方が2分でわかる</title>
+<meta name="description" content="8つの質問で、あなたが無理なく続けられるトレーニング×食事スタイルを診断。パワー型・持久型・効率型・感覚型の4タイプから、あなたに合うやり方が2分でわかります。">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="筋トレ×食事タイプ診断">
+<meta property="og:description" content="8つの質問で、あなたが無理なく続けられるトレーニング×食事スタイルを診断。パワー型・持久型・効率型・感覚型、あなたはどのタイプ?">
+<meta property="og:image" content="https://placehold.co/1200x630/14171F/FF5A36?text=筋トレ%C3%97食事タイプ診断">
+<meta property="og:site_name" content="筋トレ×食事タイプ診断">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="筋トレ×食事タイプ診断">
+<meta name="twitter:description" content="8つの質問で、あなたが無理なく続けられるトレーニング×食事スタイルを診断。パワー型・持久型・効率型・感覚型、あなたはどのタイプ?">
+<meta name="twitter:image" content="https://placehold.co/1200x630/14171F/FF5A36?text=筋トレ%C3%97食事タイプ診断">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@500;700;900&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
@@ -257,6 +269,27 @@
     gap: 10px;
   }
 
+  .btn-share {
+    background: #1a1a1a;
+    color: var(--paper);
+    border: 1.5px solid var(--line);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .btn-share:hover { background: #26262e; }
+  .btn-share svg { width: 15px; height: 15px; flex-shrink: 0; }
+
+  .disclaimer {
+    margin-top: 18px;
+    font-size: 11.5px;
+    line-height: 1.8;
+    color: var(--ink-soft);
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+  }
+
   .type-breakdown {
     display: flex;
     gap: 8px;
@@ -367,8 +400,16 @@
     </div>
 
     <div class="result-actions">
+      <button class="btn btn-share" onclick="shareResult()">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        結果をシェア
+      </button>
       <button class="btn btn-outline" onclick="restartQuiz()">もう一度診断する</button>
     </div>
+
+    <p class="disclaimer">
+      本診断はエンターテインメント・セルフチェックを目的としたものであり、医学的・栄養学的な診断や助言を目的とするものではありません。持病がある方、妊娠中の方、体調に不安のある方は、トレーニングや食事内容を変更する前に医師・管理栄養士などの専門家にご相談ください。
+    </p>
   </div>
 
 </div>
@@ -494,6 +535,22 @@
   let currentQuestion = 0;
   let scores = { P: 0, E: 0, K: 0, F: 0 };
 
+  function showResultFromType(type) {
+    scores = { P: 0, E: 0, K: 0, F: 0 };
+    scores[type] = questions.length;
+    showResultInner(type);
+  }
+
+  function initFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    const type = params.get('type');
+    if (type && results[type]) {
+      showResultFromType(type);
+      return true;
+    }
+    return false;
+  }
+
   function startQuiz() {
     currentQuestion = 0;
     scores = { P: 0, E: 0, K: 0, F: 0 };
@@ -539,7 +596,10 @@
     typeOrder.forEach(t => {
       if (scores[t] > scores[winner]) winner = t;
     });
+    showResultInner(winner);
+  }
 
+  function showResultInner(winner) {
     const r = results[winner];
     document.getElementById('result-kicker').textContent = r.kicker;
     document.getElementById('result-type').textContent = r.type;
@@ -575,6 +635,17 @@
   function restartQuiz() {
     startQuiz();
   }
+
+  function shareResult() {
+    const winner = Object.keys(scores).reduce((a, b) => (scores[b] > scores[a] ? b : a));
+    const r = results[winner];
+    const text = `私の続けやすいトレーニング×食事タイプは「${r.type}」でした!\n${r.tagline}\n\n#筋トレ食事タイプ診断`;
+    const url = window.location.href.split('?')[0] + '?type=' + winner;
+    const shareUrl = 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(text) + '&url=' + encodeURIComponent(url);
+    window.open(shareUrl, '_blank', 'noopener,noreferrer,width=600,height=500');
+  }
+
+  initFromUrl();
 </script>
 
 </body>
