@@ -193,6 +193,24 @@
     margin-top: 28px;
   }
 
+  .back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: none;
+    color: var(--ink-soft);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    padding: 0;
+    margin-bottom: 20px;
+    visibility: hidden;
+  }
+
+  .back-btn.visible { visibility: visible; }
+  .back-btn:hover { color: var(--paper); }
+
   /* ---------- RESULT SCREEN ---------- */
   .result-card {
     background: var(--paper);
@@ -264,6 +282,14 @@
 
   .caution b { color: var(--ink); }
 
+  .copy-note {
+    font-size: 12px;
+    color: var(--ink-soft);
+    text-align: center;
+    margin-top: 8px;
+    min-height: 16px;
+  }
+
   .result-actions {
     display: flex;
     gap: 10px;
@@ -280,6 +306,14 @@
   }
   .btn-share:hover { background: #26262e; }
   .btn-share svg { width: 15px; height: 15px; flex-shrink: 0; }
+
+  .btn-line {
+    background: #06C755;
+    color: #fff;
+    border: none;
+  }
+  .btn-line:hover { background: #05b34c; }
+  .btn-line svg { width: 16px; height: 16px; flex-shrink: 0; }
 
   .disclaimer {
     margin-top: 18px;
@@ -330,6 +364,7 @@
     .hero-title { font-size: 32px; }
     .result-type { font-size: 28px; }
     .question-text { font-size: 20px; }
+    .result-actions { flex-direction: column; }
   }
 </style>
 </head>
@@ -366,16 +401,17 @@
     <div class="progress-row">
       <div class="progress-count"><span id="q-current">1</span> <span>/ 8</span></div>
     </div>
-    <div class="progress-track">
+    <div class="progress-track" role="progressbar" aria-label="診断の進行状況" aria-valuemin="0" aria-valuemax="100" id="progress-track">
       <div class="progress-fill" id="progress-fill"></div>
     </div>
-    <div class="question-text" id="question-text"></div>
-    <div class="options" id="options-container"></div>
+    <button class="back-btn" id="back-btn" onclick="goBack()">← 前の質問に戻る</button>
+    <div class="question-text" id="question-text" aria-live="polite"></div>
+    <div class="options" id="options-container" role="group" aria-label="選択肢"></div>
   </div>
 
   <!-- RESULT -->
   <div class="screen" id="screen-result">
-    <div class="result-card">
+    <div class="result-card" aria-live="polite">
       <div class="result-kicker" id="result-kicker">DIAGNOSIS RESULT</div>
       <h2 class="result-type" id="result-type"></h2>
       <p class="result-tagline" id="result-tagline"></p>
@@ -401,11 +437,20 @@
 
     <div class="result-actions">
       <button class="btn btn-share" onclick="shareResult()">
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
         結果をシェア
+      </button>
+      <button class="btn btn-line" onclick="shareLine()">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M12 2C6.48 2 2 5.94 2 10.78c0 4.34 3.55 7.98 8.35 8.67.33.07.77.22.88.5.1.26.07.66.03.92l-.14.86c-.04.26-.2 1 .87.55s5.77-3.4 7.87-5.82C21.32 14.09 22 12.5 22 10.78 22 5.94 17.52 2 12 2z"/></svg>
+        LINEでシェア
       </button>
       <button class="btn btn-outline" onclick="restartQuiz()">もう一度診断する</button>
     </div>
+
+    <div class="result-actions" style="margin-top:10px;">
+      <button class="btn btn-outline" onclick="copyResult()">結果をコピー</button>
+    </div>
+    <p class="copy-note" id="copy-note" aria-live="polite"></p>
 
     <p class="disclaimer">
       本診断はエンターテインメント・セルフチェックを目的としたものであり、医学的・栄養学的な診断や助言を目的とするものではありません。持病がある方、妊娠中の方、体調に不安のある方は、トレーニングや食事内容を変更する前に医師・管理栄養士などの専門家にご相談ください。
@@ -534,6 +579,17 @@
 
   let currentQuestion = 0;
   let scores = { P: 0, E: 0, K: 0, F: 0 };
+  let quizQuestions = [];
+  let userAnswers = [];
+
+  function shuffleArray(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
 
   function showResultFromType(type) {
     scores = { P: 0, E: 0, K: 0, F: 0 };
@@ -554,6 +610,12 @@
   function startQuiz() {
     currentQuestion = 0;
     scores = { P: 0, E: 0, K: 0, F: 0 };
+    userAnswers = [];
+    // 出題順と選択肢の並びを毎回シャッフルし、位置から結果を予測しにくくする
+    quizQuestions = shuffleArray(questions).map(q => ({
+      text: q.text,
+      options: shuffleArray(q.options)
+    }));
     showScreen('screen-quiz');
     renderQuestion();
   }
@@ -564,10 +626,15 @@
   }
 
   function renderQuestion() {
-    const q = questions[currentQuestion];
+    const q = quizQuestions[currentQuestion];
     document.getElementById('q-current').textContent = currentQuestion + 1;
-    document.getElementById('progress-fill').style.width = ((currentQuestion) / questions.length * 100) + '%';
+    const progressPct = (currentQuestion / quizQuestions.length * 100);
+    document.getElementById('progress-fill').style.width = progressPct + '%';
+    document.getElementById('progress-track').setAttribute('aria-valuenow', Math.round(progressPct));
     document.getElementById('question-text').textContent = q.text;
+
+    const backBtn = document.getElementById('back-btn');
+    backBtn.classList.toggle('visible', currentQuestion > 0);
 
     const container = document.getElementById('options-container');
     container.innerHTML = '';
@@ -582,8 +649,9 @@
 
   function selectOption(type) {
     scores[type]++;
+    userAnswers.push(type);
     currentQuestion++;
-    if (currentQuestion < questions.length) {
+    if (currentQuestion < quizQuestions.length) {
       renderQuestion();
     } else {
       document.getElementById('progress-fill').style.width = '100%';
@@ -591,11 +659,19 @@
     }
   }
 
+  function goBack() {
+    if (currentQuestion === 0) return;
+    currentQuestion--;
+    const lastType = userAnswers.pop();
+    if (lastType) scores[lastType]--;
+    renderQuestion();
+  }
+
   function showResult() {
-    let winner = 'P';
-    typeOrder.forEach(t => {
-      if (scores[t] > scores[winner]) winner = t;
-    });
+    // 同点の場合は常に同じタイプに寄らないよう、最高得点のタイプからランダムに選ぶ
+    const maxScore = Math.max(...typeOrder.map(t => scores[t]));
+    const topTypes = typeOrder.filter(t => scores[t] === maxScore);
+    const winner = topTypes[Math.floor(Math.random() * topTypes.length)];
     showResultInner(winner);
   }
 
@@ -630,19 +706,51 @@
     });
 
     showScreen('screen-result');
+    const note = document.getElementById('copy-note');
+    if (note) note.textContent = '';
   }
 
   function restartQuiz() {
     startQuiz();
   }
 
+  function getDisplayedResultType() {
+    const label = document.getElementById('result-type').textContent;
+    return typeOrder.find(t => results[t].type === label) || 'P';
+  }
+
   function shareResult() {
-    const winner = Object.keys(scores).reduce((a, b) => (scores[b] > scores[a] ? b : a));
+    const winner = getDisplayedResultType();
     const r = results[winner];
     const text = `私の続けやすいトレーニング×食事タイプは「${r.type}」でした!\n${r.tagline}\n\n#筋トレ食事タイプ診断`;
     const url = window.location.href.split('?')[0] + '?type=' + winner;
     const shareUrl = 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(text) + '&url=' + encodeURIComponent(url);
     window.open(shareUrl, '_blank', 'noopener,noreferrer,width=600,height=500');
+  }
+
+  function shareLine() {
+    const winner = getDisplayedResultType();
+    const r = results[winner];
+    const text = `私の続けやすいトレーニング×食事タイプは「${r.type}」でした!\n${r.tagline}\n\n#筋トレ食事タイプ診断`;
+    const url = window.location.href.split('?')[0] + '?type=' + winner;
+    const shareUrl = 'https://line.me/R/msg/text/?' + encodeURIComponent(text + '\n' + url);
+    window.open(shareUrl, '_blank', 'noopener,noreferrer');
+  }
+
+  function copyResult() {
+    const winner = getDisplayedResultType();
+    const r = results[winner];
+    const text = `【筋トレ×食事タイプ診断】\n私は「${r.type}」でした。\n${r.tagline}\n\nあなたのタイプは?\n${window.location.href.split('?')[0]}`;
+    const note = document.getElementById('copy-note');
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text).then(() => {
+        note.textContent = 'コピーしました。好きな場所に貼り付けてシェアできます。';
+      }).catch(() => {
+        note.textContent = 'コピーに失敗しました。手動で選択してコピーしてください。';
+      });
+    } else {
+      note.textContent = 'このブラウザではコピー機能が利用できません。';
+    }
   }
 
   initFromUrl();
