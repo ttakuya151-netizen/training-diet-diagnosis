@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>筋トレ×食事タイプ診断 | あなたに合う続け方が2分でわかる</title>
 <meta name="description" content="8つの質問で、あなたが無理なく続けられるトレーニング×食事スタイルを診断。パワー型・持久型・効率型・感覚型の4タイプから、あなたに合うやり方が2分でわかります。">
+<meta name="theme-color" content="#14171F">
 
 <meta property="og:type" content="website">
 <meta property="og:title" content="筋トレ×食事タイプ診断">
@@ -22,25 +23,49 @@
 <style>
   :root {
     --ink: #14171F;
+    --ink-2: #1C202B;
+    --ink-3: #262B38;
     --ink-soft: #9AA0AE;
     --paper: #F6F3EC;
     --paper-dim: #E7E2D6;
+    --paper-text: #2a2d35;
+    --paper-muted: #5b5f6b;
     --power: #FF5A36;
     --mint: #2FBF9F;
-    --line: rgba(246, 243, 236, 0.16);
+    --line: rgba(246, 243, 236, 0.14);
+    --line-strong: rgba(246, 243, 236, 0.28);
+
+    /* タイプ別アクセント */
+    --type-P: #FF5A36;
+    --type-E: #2FBF9F;
+    --type-K: #F5B62E;
+    --type-F: #A594FF;
+
+    --accent: var(--power);
+    --radius: 12px;
+    --radius-sm: 8px;
+    --ease: cubic-bezier(.2, .7, .2, 1);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
+  html { -webkit-text-size-adjust: 100%; }
+
   body {
-    background: var(--ink);
+    background:
+      radial-gradient(600px 400px at 85% -10%, rgba(255, 90, 54, 0.16), transparent 70%),
+      radial-gradient(500px 380px at -10% 110%, rgba(47, 191, 159, 0.10), transparent 70%),
+      var(--ink);
+    background-attachment: fixed;
     color: var(--paper);
     font-family: 'Noto Sans JP', sans-serif;
     min-height: 100vh;
+    min-height: 100dvh;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 32px 16px;
+    padding: 40px 16px;
+    -webkit-font-smoothing: antialiased;
   }
 
   .app {
@@ -54,46 +79,127 @@
     letter-spacing: 0.01em;
   }
 
-  /* ---------- START SCREEN ---------- */
-  .screen { display: none; }
-  .screen.active { display: block; }
+  button { font: inherit; }
 
+  :focus-visible {
+    outline: 2px solid var(--paper);
+    outline-offset: 3px;
+  }
+
+  /* ---------- SCREEN ---------- */
+  .screen { display: none; }
+  .screen.active {
+    display: block;
+    animation: fadeUp 0.45s var(--ease) both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ---------- START SCREEN ---------- */
   .kicker {
-    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    letter-spacing: 0.12em;
     color: var(--power);
     font-weight: 700;
-    margin-bottom: 14px;
+    padding: 6px 12px;
+    border: 1px solid rgba(255, 90, 54, 0.4);
+    border-radius: 999px;
+    margin-bottom: 20px;
+  }
+  .kicker::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--power);
   }
 
   .hero-title {
     font-size: 40px;
-    line-height: 1.25;
+    line-height: 1.3;
     margin-bottom: 20px;
   }
 
-  .hero-title .accent { color: var(--power); }
+  .hero-title .nb { display: inline-block; }
+
+  .hero-title .accent {
+    color: var(--power);
+    background: linear-gradient(transparent 68%, rgba(255, 90, 54, 0.22) 68%);
+  }
 
   .hero-desc {
     font-size: 15px;
     line-height: 1.9;
     color: var(--ink-soft);
-    margin-bottom: 32px;
+    margin-bottom: 28px;
+  }
+
+  .type-preview {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 28px;
+  }
+
+  .type-chip {
+    background: var(--ink-2);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    padding: 14px 8px 12px;
+    text-align: center;
+  }
+
+  .type-chip .badge { margin: 0 auto 8px; }
+
+  .type-chip-name {
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+  }
+
+  .badge {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-weight: 900;
+    font-size: 15px;
+    color: var(--ink);
+    background: var(--accent);
   }
 
   .meta-row {
-    display: flex;
-    gap: 24px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
     padding: 18px 0;
     border-top: 1px solid var(--line);
     border-bottom: 1px solid var(--line);
-    margin-bottom: 32px;
+    margin-bottom: 28px;
   }
+
+  .meta-item { text-align: center; }
+
+  .meta-item + .meta-item { border-left: 1px solid var(--line); }
 
   .meta-item .num {
     font-family: 'Zen Kaku Gothic New', sans-serif;
     font-weight: 900;
     font-size: 26px;
     display: block;
+    line-height: 1.2;
+  }
+
+  .meta-item .num small {
+    font-size: 14px;
+    margin-left: 2px;
   }
 
   .meta-item .label {
@@ -106,62 +212,97 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: 8px;
     width: 100%;
-    padding: 18px 24px;
+    min-height: 56px;
+    padding: 16px 20px;
     background: var(--power);
     color: var(--ink);
     font-family: 'Zen Kaku Gothic New', sans-serif;
     font-weight: 900;
-    font-size: 17px;
+    font-size: 16px;
     border: none;
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     cursor: pointer;
-    transition: transform 0.15s ease, background 0.15s ease;
+    text-decoration: none;
+    transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
   }
 
   .btn:hover { background: #ff6f4f; transform: translateY(-1px); }
   .btn:active { transform: translateY(0); }
 
+  .btn-primary {
+    font-size: 17px;
+    box-shadow: 0 10px 30px -10px rgba(255, 90, 54, 0.6);
+  }
+  .btn-primary:hover { box-shadow: 0 14px 34px -10px rgba(255, 90, 54, 0.7); }
+
+  .btn-primary .arrow { transition: transform 0.2s var(--ease); }
+  .btn-primary:hover .arrow { transform: translateX(4px); }
+
   .btn-outline {
     background: transparent;
     color: var(--paper);
-    border: 1.5px solid var(--line);
+    border: 1.5px solid var(--line-strong);
   }
-  .btn-outline:hover { background: rgba(246,243,236,0.06); }
+  .btn-outline:hover { background: rgba(246, 243, 236, 0.06); }
+
+  .btn svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+  .start-note {
+    margin-top: 14px;
+    text-align: center;
+    font-size: 12px;
+    color: var(--ink-soft);
+  }
 
   /* ---------- QUIZ SCREEN ---------- */
-  .progress-row {
+  .quiz-head {
     display: flex;
-    align-items: baseline;
+    align-items: center;
     justify-content: space-between;
-    margin-bottom: 10px;
+    margin-bottom: 14px;
+    min-height: 32px;
   }
 
   .progress-count {
     font-family: 'Zen Kaku Gothic New', sans-serif;
     font-weight: 900;
-    font-size: 22px;
+    font-size: 15px;
+    color: var(--ink-soft);
+    letter-spacing: 0.04em;
   }
-  .progress-count span { color: var(--ink-soft); font-size: 15px; }
+  .progress-count .q-num {
+    font-size: 28px;
+    color: var(--paper);
+    margin-right: 2px;
+  }
 
   .progress-track {
-    height: 4px;
-    background: var(--line);
-    border-radius: 2px;
-    overflow: hidden;
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 4px;
     margin-bottom: 36px;
   }
-  .progress-fill {
-    height: 100%;
-    background: var(--power);
-    width: 0%;
-    transition: width 0.35s ease;
+
+  .progress-seg {
+    height: 4px;
+    border-radius: 2px;
+    background: var(--line);
+    transition: background 0.3s ease;
   }
+  .progress-seg.done { background: var(--power); }
+  .progress-seg.current { background: rgba(255, 90, 54, 0.45); }
+
+  .question-wrap.enter { animation: fadeUp 0.35s var(--ease) both; }
 
   .question-text {
     font-size: 24px;
-    line-height: 1.5;
-    margin-bottom: 28px;
+    line-height: 1.55;
+    margin-bottom: 24px;
+    min-height: 3.1em;
+    display: flex;
+    align-items: flex-end;
   }
 
   .options {
@@ -171,27 +312,59 @@
   }
 
   .option {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
     text-align: left;
-    padding: 18px 20px;
-    background: transparent;
+    padding: 16px 18px;
+    background: var(--ink-2);
     border: 1.5px solid var(--line);
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     color: var(--paper);
     font-family: 'Noto Sans JP', sans-serif;
     font-size: 15px;
     line-height: 1.6;
     cursor: pointer;
-    transition: border-color 0.15s ease, background 0.15s ease;
+    transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease, opacity 0.2s ease;
+  }
+
+  .option-key {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    border: 1px solid var(--line-strong);
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-weight: 900;
+    font-size: 13px;
+    color: var(--ink-soft);
+    transition: all 0.15s ease;
   }
 
   .option:hover {
     border-color: var(--power);
     background: rgba(255, 90, 54, 0.08);
   }
-
-  .quiz-nav {
-    margin-top: 28px;
+  .option:hover .option-key {
+    border-color: var(--power);
+    color: var(--power);
   }
+  .option:active { transform: scale(0.99); }
+
+  .option.selected {
+    border-color: var(--power);
+    background: rgba(255, 90, 54, 0.16);
+  }
+  .option.selected .option-key {
+    background: var(--power);
+    border-color: var(--power);
+    color: var(--ink);
+  }
+  .options.locked .option:not(.selected) { opacity: 0.4; }
+  .options.locked .option { pointer-events: none; }
 
   .back-btn {
     display: inline-flex;
@@ -203,8 +376,7 @@
     font-family: 'Noto Sans JP', sans-serif;
     font-size: 13px;
     cursor: pointer;
-    padding: 0;
-    margin-bottom: 20px;
+    padding: 6px 2px;
     visibility: hidden;
   }
 
@@ -215,97 +387,191 @@
   .result-card {
     background: var(--paper);
     color: var(--ink);
-    border-radius: 4px;
-    padding: 36px 28px;
-    margin-bottom: 24px;
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 20px;
+    box-shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.6);
+  }
+
+  .result-hero {
+    position: relative;
+    background: var(--accent);
+    color: var(--ink);
+    padding: 32px 28px 28px;
+    overflow: hidden;
+  }
+
+  .result-hero::after {
+    content: attr(data-letter);
+    position: absolute;
+    right: 12px;
+    bottom: -36px;
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-weight: 900;
+    font-size: 180px;
+    line-height: 1;
+    color: rgba(20, 23, 31, 0.1);
+    pointer-events: none;
   }
 
   .result-kicker {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    background: var(--ink);
+    color: var(--paper);
+    padding: 4px 10px;
+    border-radius: 999px;
+    margin-bottom: 14px;
+  }
+
+  .result-lead {
     font-size: 13px;
     font-weight: 700;
-    color: var(--power);
-    margin-bottom: 10px;
+    margin-bottom: 2px;
+    opacity: 0.75;
   }
 
   .result-type {
-    font-size: 34px;
-    line-height: 1.3;
-    margin-bottom: 8px;
+    font-size: 44px;
+    line-height: 1.2;
+    margin-bottom: 10px;
   }
 
   .result-tagline {
+    position: relative;
+    z-index: 1;
     font-size: 15px;
-    color: #5b5f6b;
-    margin-bottom: 24px;
+    font-weight: 700;
+    line-height: 1.7;
+  }
+
+  .result-body {
+    padding: 28px 28px 30px;
+  }
+
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-size: 14px;
+    font-weight: 900;
+    color: var(--ink);
+    margin-bottom: 10px;
+  }
+  .section-title::before {
+    content: "";
+    width: 4px;
+    height: 16px;
+    border-radius: 2px;
+    background: var(--accent);
+  }
+  .section-title.diet::before { background: var(--mint); }
+  .section-title.training::before { background: var(--power); }
+
+  .type-breakdown {
+    margin-bottom: 26px;
     padding-bottom: 24px;
     border-bottom: 1px solid var(--paper-dim);
   }
 
-  .stat-block {
-    margin-bottom: 22px;
+  .type-row {
+    display: grid;
+    grid-template-columns: 44px 1fr 32px;
+    align-items: center;
+    gap: 10px;
+    font-size: 12.5px;
   }
+  .type-row + .type-row { margin-top: 8px; }
 
-  .stat-label {
-    display: inline-block;
-    font-size: 12px;
+  .type-row-name {
     font-weight: 700;
-    padding: 3px 10px;
-    border-radius: 3px;
-    margin-bottom: 10px;
+    color: var(--paper-muted);
   }
 
-  .stat-label.training { background: var(--power); color: var(--ink); }
-  .stat-label.diet { background: var(--mint); color: var(--ink); }
+  .type-row-track {
+    height: 10px;
+    background: var(--paper-dim);
+    border-radius: 5px;
+    overflow: hidden;
+  }
+
+  .type-row-fill {
+    height: 100%;
+    width: 0;
+    border-radius: 5px;
+    background: #BDB7A9;
+    transition: width 0.8s var(--ease);
+  }
+
+  .type-row.leading .type-row-name,
+  .type-row.leading .type-row-score { color: var(--ink); }
+  .type-row.leading .type-row-fill { background: var(--accent); }
+
+  .type-row-score {
+    text-align: right;
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-weight: 900;
+    color: var(--paper-muted);
+  }
+
+  .stat-block {
+    margin-bottom: 24px;
+  }
 
   .stat-body {
     font-size: 14.5px;
-    line-height: 1.85;
-    color: #2a2d35;
+    line-height: 1.9;
+    color: var(--paper-text);
   }
 
   .sample-day {
-    background: var(--paper-dim);
-    border-radius: 4px;
+    background: #fff;
+    border: 1px solid var(--paper-dim);
+    border-radius: var(--radius-sm);
     padding: 16px 18px;
     margin-bottom: 22px;
   }
 
-  .sample-day .stat-body { font-size: 13.5px; }
+  .sample-day .section-title { font-size: 13px; margin-bottom: 6px; }
+  .sample-day .section-title::before { background: var(--ink-soft); }
+  .sample-day .stat-body { font-size: 13.5px; line-height: 1.85; }
 
   .caution {
     font-size: 13px;
-    line-height: 1.8;
-    color: #5b5f6b;
-    padding-top: 18px;
-    border-top: 1px solid var(--paper-dim);
+    line-height: 1.85;
+    color: var(--paper-muted);
+    background: rgba(20, 23, 31, 0.04);
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
   }
 
   .caution b { color: var(--ink); }
 
-  .copy-note {
-    font-size: 12px;
-    color: var(--ink-soft);
+  .share-heading {
     text-align: center;
-    margin-top: 8px;
-    min-height: 16px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink-soft);
+    margin-bottom: 12px;
   }
 
   .result-actions {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 10px;
   }
+  .result-actions + .result-actions { margin-top: 10px; }
 
   .btn-share {
-    background: #1a1a1a;
-    color: var(--paper);
-    border: 1.5px solid var(--line);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
+    background: #000;
+    color: #fff;
+    border: 1.5px solid var(--line-strong);
   }
-  .btn-share:hover { background: #26262e; }
-  .btn-share svg { width: 15px; height: 15px; flex-shrink: 0; }
+  .btn-share:hover { background: #111; }
+  .btn-share svg { width: 15px; height: 15px; }
 
   .btn-line {
     background: #06C755;
@@ -313,10 +579,17 @@
     border: none;
   }
   .btn-line:hover { background: #05b34c; }
-  .btn-line svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+  .copy-note {
+    font-size: 12px;
+    color: var(--mint);
+    text-align: center;
+    margin-top: 10px;
+    min-height: 18px;
+  }
 
   .disclaimer {
-    margin-top: 18px;
+    margin-top: 16px;
     font-size: 11.5px;
     line-height: 1.8;
     color: var(--ink-soft);
@@ -324,47 +597,37 @@
     border-top: 1px solid var(--line);
   }
 
-  .type-breakdown {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 24px;
-  }
-
-  .type-bar {
-    flex: 1;
-    text-align: center;
-  }
-
-  .type-bar-track {
-    height: 60px;
-    width: 100%;
-    background: var(--line);
-    border-radius: 3px;
-    position: relative;
-    overflow: hidden;
-    display: flex;
-    align-items: flex-end;
-  }
-
-  .type-bar-fill {
-    width: 100%;
-    background: var(--ink-soft);
-    transition: height 0.5s ease;
-  }
-
-  .type-bar-fill.leading { background: var(--power); }
-
-  .type-bar-name {
-    font-size: 11px;
-    color: var(--ink-soft);
-    margin-top: 8px;
-  }
+  [data-type="P"] { --accent: var(--type-P); }
+  [data-type="E"] { --accent: var(--type-E); }
+  [data-type="K"] { --accent: var(--type-K); }
+  [data-type="F"] { --accent: var(--type-F); }
 
   @media (max-width: 420px) {
-    .hero-title { font-size: 32px; }
-    .result-type { font-size: 28px; }
+    body { padding: 28px 16px; }
+    .hero-title { font-size: 31px; }
+    .type-preview { grid-template-columns: repeat(2, 1fr); }
+    .type-chip {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      text-align: left;
+    }
+    .type-chip .badge { margin: 0; width: 28px; height: 28px; font-size: 13px; }
+    .meta-item .num { font-size: 22px; }
     .question-text { font-size: 20px; }
-    .result-actions { flex-direction: column; }
+    .option { padding: 14px 14px; gap: 12px; }
+    .result-hero { padding: 28px 22px 24px; }
+    .result-body { padding: 24px 22px 26px; }
+    .result-type { font-size: 36px; }
+    .btn { font-size: 15px; padding: 14px 12px; gap: 6px; white-space: nowrap; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 </style>
 </head>
@@ -375,80 +638,105 @@
   <!-- START -->
   <div class="screen active" id="screen-start">
     <div class="kicker">TRAINING × DIET DIAGNOSIS</div>
-    <h1 class="hero-title">あなたの<span class="accent">続けやすい</span><br>トレーニング×食事タイプは?</h1>
+    <h1 class="hero-title">あなたの<span class="accent">続けやすい</span><br><span class="nb">トレーニング×</span><span class="nb">食事タイプは?</span></h1>
     <p class="hero-desc">
       トレーニングの頻度から食事の選び方まで、8つの質問から「無理なく続けられるスタイル」を診断します。正解はひとつではなく、自分の生活リズムに合った形を見つけるための診断です。
     </p>
+    <div class="type-preview" aria-label="診断タイプ一覧">
+      <div class="type-chip" data-type="P"><span class="badge" aria-hidden="true">P</span><span class="type-chip-name">パワー型</span></div>
+      <div class="type-chip" data-type="E"><span class="badge" aria-hidden="true">E</span><span class="type-chip-name">持久型</span></div>
+      <div class="type-chip" data-type="K"><span class="badge" aria-hidden="true">K</span><span class="type-chip-name">効率型</span></div>
+      <div class="type-chip" data-type="F"><span class="badge" aria-hidden="true">F</span><span class="type-chip-name">感覚型</span></div>
+    </div>
     <div class="meta-row">
       <div class="meta-item">
-        <span class="num">8問</span>
+        <span class="num">8<small>問</small></span>
         <span class="label">質問数</span>
       </div>
       <div class="meta-item">
-        <span class="num">2分</span>
+        <span class="num">2<small>分</small></span>
         <span class="label">所要時間</span>
       </div>
       <div class="meta-item">
-        <span class="num">4種</span>
+        <span class="num">4<small>種</small></span>
         <span class="label">診断タイプ</span>
       </div>
     </div>
-    <button class="btn" onclick="startQuiz()">診断をはじめる</button>
+    <button class="btn btn-primary" onclick="startQuiz()">
+      診断をはじめる
+      <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </button>
+    <p class="start-note">登録不要・無料で診断できます</p>
   </div>
 
   <!-- QUIZ -->
   <div class="screen" id="screen-quiz">
-    <div class="progress-row">
-      <div class="progress-count"><span id="q-current">1</span> <span>/ 8</span></div>
+    <div class="quiz-head">
+      <div class="progress-count"><span class="q-num">Q<span id="q-current">1</span></span> / 8</div>
+      <button class="back-btn" id="back-btn" onclick="goBack()">← 前の質問に戻る</button>
     </div>
-    <div class="progress-track" role="progressbar" aria-label="診断の進行状況" aria-valuemin="0" aria-valuemax="100" id="progress-track">
-      <div class="progress-fill" id="progress-fill"></div>
+    <div class="progress-track" role="progressbar" aria-label="診断の進行状況" aria-valuemin="0" aria-valuemax="100" id="progress-track"></div>
+    <div class="question-wrap" id="question-wrap">
+      <div class="question-text display" id="question-text" aria-live="polite"></div>
+      <div class="options" id="options-container" role="group" aria-label="選択肢"></div>
     </div>
-    <button class="back-btn" id="back-btn" onclick="goBack()">← 前の質問に戻る</button>
-    <div class="question-text" id="question-text" aria-live="polite"></div>
-    <div class="options" id="options-container" role="group" aria-label="選択肢"></div>
   </div>
 
   <!-- RESULT -->
   <div class="screen" id="screen-result">
-    <div class="result-card" aria-live="polite">
-      <div class="result-kicker" id="result-kicker">DIAGNOSIS RESULT</div>
-      <h2 class="result-type" id="result-type"></h2>
-      <p class="result-tagline" id="result-tagline"></p>
-
-      <div class="type-breakdown" id="type-breakdown"></div>
-
-      <div class="stat-block">
-        <span class="stat-label training">トレーニング</span>
-        <p class="stat-body" id="result-training"></p>
+    <div class="result-card" id="result-card" aria-live="polite">
+      <div class="result-hero" id="result-hero">
+        <div class="result-kicker" id="result-kicker">DIAGNOSIS RESULT</div>
+        <p class="result-lead">あなたの続けやすいタイプは</p>
+        <h2 class="result-type" id="result-type"></h2>
+        <p class="result-tagline" id="result-tagline"></p>
       </div>
 
-      <div class="stat-block">
-        <span class="stat-label diet">食事</span>
-        <p class="stat-body" id="result-diet"></p>
-      </div>
+      <div class="result-body">
+        <div class="type-breakdown" id="type-breakdown-wrap">
+          <h3 class="section-title">タイプ別スコア</h3>
+          <div id="type-breakdown"></div>
+        </div>
 
-      <div class="sample-day">
-        <p class="stat-body" id="result-sample"></p>
-      </div>
+        <div class="stat-block">
+          <h3 class="section-title training">トレーニング</h3>
+          <p class="stat-body" id="result-training"></p>
+        </div>
 
-      <p class="caution" id="result-caution"></p>
+        <div class="stat-block">
+          <h3 class="section-title diet">食事</h3>
+          <p class="stat-body" id="result-diet"></p>
+        </div>
+
+        <div class="sample-day">
+          <h3 class="section-title">1日の食事イメージ</h3>
+          <p class="stat-body" id="result-sample"></p>
+        </div>
+
+        <p class="caution" id="result-caution"></p>
+      </div>
     </div>
 
+    <p class="share-heading">結果をシェアする</p>
     <div class="result-actions">
       <button class="btn btn-share" onclick="shareResult()">
         <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-        結果をシェア
+        でシェア
       </button>
       <button class="btn btn-line" onclick="shareLine()">
         <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M12 2C6.48 2 2 5.94 2 10.78c0 4.34 3.55 7.98 8.35 8.67.33.07.77.22.88.5.1.26.07.66.03.92l-.14.86c-.04.26-.2 1 .87.55s5.77-3.4 7.87-5.82C21.32 14.09 22 12.5 22 10.78 22 5.94 17.52 2 12 2z"/></svg>
-        LINEでシェア
+        LINEで送る
       </button>
-      <button class="btn btn-outline" onclick="restartQuiz()">もう一度診断する</button>
     </div>
-
-    <div class="result-actions" style="margin-top:10px;">
-      <button class="btn btn-outline" onclick="copyResult()">結果をコピー</button>
+    <div class="result-actions">
+      <button class="btn btn-outline" onclick="copyResult()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg>
+        結果をコピー
+      </button>
+      <button class="btn btn-outline" id="restart-btn" onclick="restartQuiz()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+        <span id="restart-label">もう一度診断する</span>
+      </button>
     </div>
     <p class="copy-note" id="copy-note" aria-live="polite"></p>
 
@@ -576,11 +864,14 @@
 
   const typeOrder = ["P", "E", "K", "F"];
   const typeNames = { P: "パワー", E: "持久", K: "効率", F: "感覚" };
+  const optionKeys = ["A", "B", "C", "D"];
+  const SELECT_DELAY = 220;
 
   let currentQuestion = 0;
   let scores = { P: 0, E: 0, K: 0, F: 0 };
   let quizQuestions = [];
   let userAnswers = [];
+  let isSharedView = false;
 
   function shuffleArray(arr) {
     const a = arr.slice();
@@ -592,8 +883,9 @@
   }
 
   function showResultFromType(type) {
+    // シェアURLから開いた場合はスコアが無いので、内訳は表示しない
+    isSharedView = true;
     scores = { P: 0, E: 0, K: 0, F: 0 };
-    scores[type] = questions.length;
     showResultInner(type);
   }
 
@@ -608,6 +900,7 @@
   }
 
   function startQuiz() {
+    isSharedView = false;
     currentQuestion = 0;
     scores = { P: 0, E: 0, K: 0, F: 0 };
     userAnswers = [];
@@ -616,6 +909,13 @@
       text: q.text,
       options: shuffleArray(q.options)
     }));
+    const track = document.getElementById('progress-track');
+    track.innerHTML = '';
+    quizQuestions.forEach(() => {
+      const seg = document.createElement('div');
+      seg.className = 'progress-seg';
+      track.appendChild(seg);
+    });
     showScreen('screen-quiz');
     renderQuestion();
   }
@@ -623,14 +923,23 @@
   function showScreen(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
+    window.scrollTo(0, 0);
+  }
+
+  function updateProgress(answered) {
+    const segs = document.querySelectorAll('.progress-seg');
+    segs.forEach((seg, i) => {
+      seg.classList.toggle('done', i < answered);
+      seg.classList.toggle('current', i === answered);
+    });
+    const progressPct = answered / quizQuestions.length * 100;
+    document.getElementById('progress-track').setAttribute('aria-valuenow', Math.round(progressPct));
   }
 
   function renderQuestion() {
     const q = quizQuestions[currentQuestion];
     document.getElementById('q-current').textContent = currentQuestion + 1;
-    const progressPct = (currentQuestion / quizQuestions.length * 100);
-    document.getElementById('progress-fill').style.width = progressPct + '%';
-    document.getElementById('progress-track').setAttribute('aria-valuenow', Math.round(progressPct));
+    updateProgress(currentQuestion);
     document.getElementById('question-text').textContent = q.text;
 
     const backBtn = document.getElementById('back-btn');
@@ -638,25 +947,45 @@
 
     const container = document.getElementById('options-container');
     container.innerHTML = '';
-    q.options.forEach(opt => {
+    container.classList.remove('locked');
+    q.options.forEach((opt, i) => {
       const btn = document.createElement('button');
       btn.className = 'option';
-      btn.textContent = opt.label;
-      btn.onclick = () => selectOption(opt.type);
+      const key = document.createElement('span');
+      key.className = 'option-key';
+      key.setAttribute('aria-hidden', 'true');
+      key.textContent = optionKeys[i];
+      const label = document.createElement('span');
+      label.textContent = opt.label;
+      btn.appendChild(key);
+      btn.appendChild(label);
+      btn.onclick = () => selectOption(opt.type, btn);
       container.appendChild(btn);
     });
+
+    const wrap = document.getElementById('question-wrap');
+    wrap.classList.remove('enter');
+    void wrap.offsetWidth;
+    wrap.classList.add('enter');
   }
 
-  function selectOption(type) {
-    scores[type]++;
-    userAnswers.push(type);
-    currentQuestion++;
-    if (currentQuestion < quizQuestions.length) {
-      renderQuestion();
-    } else {
-      document.getElementById('progress-fill').style.width = '100%';
-      showResult();
-    }
+  function selectOption(type, btn) {
+    const container = document.getElementById('options-container');
+    if (container.classList.contains('locked')) return;
+    container.classList.add('locked');
+    btn.classList.add('selected');
+    updateProgress(currentQuestion + 1);
+
+    setTimeout(() => {
+      scores[type]++;
+      userAnswers.push(type);
+      currentQuestion++;
+      if (currentQuestion < quizQuestions.length) {
+        renderQuestion();
+      } else {
+        showResult();
+      }
+    }, SELECT_DELAY);
   }
 
   function goBack() {
@@ -677,6 +1006,8 @@
 
   function showResultInner(winner) {
     const r = results[winner];
+    document.getElementById('result-card').dataset.type = winner;
+    document.getElementById('result-hero').dataset.letter = winner;
     document.getElementById('result-kicker').textContent = r.kicker;
     document.getElementById('result-type').textContent = r.type;
     document.getElementById('result-tagline').textContent = r.tagline;
@@ -685,32 +1016,46 @@
     document.getElementById('result-sample').textContent = r.sample;
     document.getElementById('result-caution').innerHTML = r.caution;
 
-    const maxScore = Math.max(...Object.values(scores), 1);
+    document.getElementById('type-breakdown-wrap').hidden = isSharedView;
+    document.getElementById('restart-label').textContent = isSharedView ? '自分も診断してみる' : 'もう一度診断する';
+
     const breakdown = document.getElementById('type-breakdown');
     breakdown.innerHTML = '';
+    const fills = [];
     typeOrder.forEach(t => {
-      const wrap = document.createElement('div');
-      wrap.className = 'type-bar';
+      const row = document.createElement('div');
+      row.className = 'type-row' + (t === winner ? ' leading' : '');
+      const name = document.createElement('span');
+      name.className = 'type-row-name';
+      name.textContent = typeNames[t];
       const track = document.createElement('div');
-      track.className = 'type-bar-track';
+      track.className = 'type-row-track';
       const fill = document.createElement('div');
-      fill.className = 'type-bar-fill' + (t === winner ? ' leading' : '');
-      fill.style.height = (scores[t] / questions.length * 100) + '%';
+      fill.className = 'type-row-fill';
       track.appendChild(fill);
-      const name = document.createElement('div');
-      name.className = 'type-bar-name';
-      name.textContent = typeNames[t] + ' ' + scores[t];
-      wrap.appendChild(track);
-      wrap.appendChild(name);
-      breakdown.appendChild(wrap);
+      const score = document.createElement('span');
+      score.className = 'type-row-score';
+      score.textContent = scores[t];
+      row.appendChild(name);
+      row.appendChild(track);
+      row.appendChild(score);
+      breakdown.appendChild(row);
+      fills.push([fill, scores[t] / questions.length * 100]);
     });
 
     showScreen('screen-result');
+    // 表示後に幅を設定してバーを伸ばすアニメーションにする
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      fills.forEach(([fill, pct]) => { fill.style.width = pct + '%'; });
+    }));
     const note = document.getElementById('copy-note');
     if (note) note.textContent = '';
   }
 
   function restartQuiz() {
+    if (isSharedView && window.location.search) {
+      history.replaceState(null, '', window.location.pathname);
+    }
     startQuiz();
   }
 
